@@ -4,12 +4,8 @@ title: About
 permalink: /about/
 ---
 
-Some information about you!
-
-### More Information
-
-A place to include any other types of information that you'd like to include about yourself.
+Hey there - my name is Steve DeMarco and I'm building out my website hosted as GitHub Pages. This site is currently a work in progress.
 
 ### Contact me
 
-[email@domain.com](mailto:email@domain.com)
+[demarco.st@gmail.com](mailto:demarco.st@gmail.com)
