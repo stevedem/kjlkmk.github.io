@@ -40,83 +40,99 @@ Once we have the metadata for the uploaded file, we get the actual content of th
 
 From our Function App, this is how we parse the request body:
 
-req\_body = req.get\_json()
-file\_name = req\_body.get('fileName')
-file\_content = req\_body\['fileContent'\]\['$content'\]
+```python
+req_body = req.get_json()
+file_name = req_body.get('fileName')
+file_content = req_body['fileContent']['$content']
+```
 
 Now, the `file_content` variable holds a base64-encoded version of the multi-page PDF that was uploaded into our Input folder in Box.com. In order to make use of this data, we need to do a trick:
 
-file\_data = base64.decodebytes(file\_content.encode())
+```python
+file_data = base64.decodebytes(file_content.encode())
+```
 
 First, we encode the `file_content` variable, and then decode the bytes using the `base64` package. And finally, to make this variable play nice with the `PyPDF2` package, we use the `io` package represent the bytes as an input stream, which can be read by `PyPDF2`.
 
 Then, in the next few code blocks, we create a new PDF file for each page in the original file (you can grab the entire Function App code here). We temporarily write each individual out to the local execution disk, and then read the data back in, encode the data in base64 and then finally decode the base64-encoded data.
 
-file\_data = base64.b64encode(temp\_pdf\_file.read()).decode()
+```python
+file_data = base64.b64encode(temp_pdf_file.read()).decode()
+```
 
 This is the reverse of the steps we took to parse the original, multi-page PDF and is what allows us to transfer the individual PDF data back through HTTP.
 
 At the end of our Function App code, we have a JSON variable containing a list of `fileName` and `fileContent` pairs, like below:
 
+```json
 {
-  "individualPDFs": \[
+  "individualPDFs": [
     {
-      "fileName": "MyPDF\_1\_2020-03-05-19-14-23.pdf",
+      "fileName": "MyPDF_1_2020-03-05-19-14-23.pdf",
       "fileContent": "Base64 Encoded String"
     },
     {
-      "fileName": "MyPDF\_2\_2020-03-05-19-14-23.pdf",
+      "fileName": "MyPDF_2_2020-03-05-19-14-23.pdf",
       "fileContent": "Base64 Encoded String"
     }
-  \]
+  ]
 }
+```
 
 Now, we serialize this JSON object and return this as an HTTP Response to the next step in our Logic App. The next step iterates through each of the individual fileName and fileContent pairs, writing each file to the Output folder in Box.com.
 
 If you're familiar with Logic App development, there are two development views: the Designer view, which is the drag-and-drop user interface, and the Code View, which is editing the JSON document that represents each step. Below is the JSON for the last step in our Logic App, the For each:
 
-"For\_each": {
-                "actions": {
-                    "Create\_file": {
-                        "inputs": {
-                            "body": "@base64ToBinary(items('For\_each')?\['fileContent'\])",
-                            "host": {
-                                "connection": {
-                                    "name": "@parameters('$connections')\['box'\]\['connectionId'\]"
-                                }
-                            },
-                            "method": "post",
-                            "path": "/datasets/default/files",
-                            "queries": {
-                                "folderPath": "/Output",
-                                "name": "@{items('For\_each')?\['fileName'\]}",
-                                "queryParametersSingleEncoded": true
-                            }
-                        },
-                        "runAfter": {},
-                        "type": "ApiConnection"
-                    }
-                },
-                "foreach": "@json(body('SplitPDFs'))\['individualPDFs'\]",
-                "runAfter": {
-                    "SplitPDFs": \[
-                        "Succeeded"
-                    \]
-                },
-                "type": "Foreach"
+```json
+  "For_each": {
+    "actions": {
+      "Create_file": {
+        "inputs": {
+          "body": "@base64ToBinary(items('For_each')?['fileContent'])",
+          "host": {
+            "connection": {
+              "name": "@parameters('$connections')['box']['connectionId']"
             }
+          },
+          "method": "post",
+          "path": "/datasets/default/files",
+          "queries": {
+            "folderPath": "/Output",
+            "name": "@{items('For_each')?['fileName']}",
+            "queryParametersSingleEncoded": true
+          }
+        },
+        "runAfter": {},
+        "type": "ApiConnection"
+      }
+    },
+    "foreach": "@json(body('SplitPDFs'))['individualPDFs']",
+    "runAfter": {
+      "SplitPDFs": [
+        "Succeeded"
+      ]
+    },
+    "type": "Foreach"
+  }
+```
 
 Of note are lines 5, 15 and 23. Let's start with line #23:
 
-"foreach": "@json(body('SplitPDFs'))\['individualPDFs'\]"
+```json
+"foreach": "@json(body('SplitPDFs'))['individualPDFs']"
+```
 
 This line establishes what this step in the Logic App will iterate through. Our Function App returns a JSON object with the field 'individualPDFs' containing a list of fileName and fileContent pairs. For every item in this list, the Logic App will write a new file to the Output Box.com folder.
 
 Lines 5 and 15 extract the fileContent and fileName fields for each item in the list we defined in line 23. Here they are below:
 
-"body": "@base64ToBinary(items('For\_each')?\['fileContent'\])"
+```json
+"body": "@base64ToBinary(items('For_each')?['fileContent'])"
+```
 
-"name": "@{items('For\_each')?\['fileName'\]}"
+```json
+"name": "@{items('For_each')?['fileName']}"
+```
 
 And that's it!
 
