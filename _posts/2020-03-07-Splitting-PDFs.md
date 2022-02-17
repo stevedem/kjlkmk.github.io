@@ -22,7 +22,7 @@ In this example, the workflow will be the following:
 - Function App splits apart the multi-page PDF and returns encoded data for each single-page PDF
 - Logic App writes each single-page PDF to a separate Box.com folder
 
-![](images/architecture-1.png)
+![](images/architecture.png)
 
 For me, the tricky part in this workflow is handling the PDF data - binary, base64, encoded, decoded - there are a lot of options!
 
