@@ -22,7 +22,7 @@ In this example, the workflow will be the following:
 - Function App splits apart the multi-page PDF and returns encoded data for each single-page PDF
 - Logic App writes each single-page PDF to a separate Box.com folder
 
-![](images/architecture.png)
+![_config.yml]({{ site.baseurl }}/images/architecture.png)
 
 For me, the tricky part in this workflow is handling the PDF data - binary, base64, encoded, decoded - there are a lot of options!
 
@@ -30,13 +30,13 @@ If you'd just like to check out the code for the Function App, [here is a link t
 
 Here is a quick overview of the steps in the Logic App:
 
-![](images/logic-app.png)
+![_config.yml]({{ site.baseurl }}/images/logic-app.png)
 
 The trigger that will kick-off the execution of the Logic App is when a file is created in a Box.com folder called Input. When this happens, the Logic App will gather metadata for the uploaded file that we will leverage in later steps.
 
 Once we have the metadata for the uploaded file, we get the actual content of the file using the file's unique identifier (file ID). We pass two parameters in the body of our HTTP request to the Function App - the file's content and the file's name. Here's how we do that:
 
-![](images/func-app.png)
+![_config.yml]({{ site.baseurl }}/images/func-app.png)
 
 From our Function App, this is how we parse the request body:
 
