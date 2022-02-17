@@ -9,7 +9,7 @@ tags:
   - "python"
 ---
 
-![](images/split-arrowspng-1024x538.png)
+![_config.yml]({{ site.baseurl }}/images/split-arrowspng.png)
 
 Recently, I've been working with [Form Recognizer](https://docs.microsoft.com/en-us/azure/cognitive-services/form-recognizer/overview), a new Azure Cognitive Service that leverages AI and machine learning to extract data from form-based documents. Typically, form-based documents are saved as multi-page PDF files that have been digitally scanned. In this post, I'll explain how we can leverage a Logic App and a Function App to split apart multi-page PDF files in preparation for sending them to the Form Recognizer service.
 
